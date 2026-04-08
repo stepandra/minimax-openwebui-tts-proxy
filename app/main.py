@@ -7,8 +7,11 @@ import re
 from typing import Any, Literal
 
 import httpx
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Response
 from pydantic import BaseModel, Field
+
+load_dotenv()
 
 MINIMAX_API_BASE = os.getenv("MINIMAX_API_BASE", "https://api.minimax.io/v1")
 MINIMAX_API_KEY = os.getenv("MINIMAX_API_KEY", "")

@@ -27,6 +27,12 @@ uv sync
 uv run uvicorn app.main:app --host 0.0.0.0 --port 8099
 ```
 
+`app.main` now auto-loads `.env` from the project directory via `python-dotenv`, so a plain `uvicorn` launch is enough. If you prefer being explicit, this also works:
+
+```bash
+uv run uvicorn app.main:app --host 0.0.0.0 --port 8099 --env-file .env
+```
+
 ## Test
 
 ```bash
