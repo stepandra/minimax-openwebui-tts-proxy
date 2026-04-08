@@ -21,9 +21,17 @@ DEFAULT_FORMAT = os.getenv("MINIMAX_TTS_FORMAT", "mp3")
 DEFAULT_SAMPLE_RATE = int(os.getenv("MINIMAX_TTS_SAMPLE_RATE", "32000"))
 DEFAULT_BITRATE = int(os.getenv("MINIMAX_TTS_BITRATE", "128000"))
 DEFAULT_CHANNELS = int(os.getenv("MINIMAX_TTS_CHANNELS", "1"))
-DEFAULT_SPEED = float(os.getenv("MINIMAX_TTS_SPEED", "1.0"))
-DEFAULT_VOLUME = float(os.getenv("MINIMAX_TTS_VOLUME", "1.0"))
-DEFAULT_PITCH = float(os.getenv("MINIMAX_TTS_PITCH", "0.0"))
+def _parse_json_number(value: str, *, default: str) -> int | float:
+    raw = os.getenv(value, default).strip()
+    numeric = float(raw)
+    if numeric.is_integer():
+        return int(numeric)
+    return numeric
+
+
+DEFAULT_SPEED = _parse_json_number("MINIMAX_TTS_SPEED", default="1")
+DEFAULT_VOLUME = _parse_json_number("MINIMAX_TTS_VOLUME", default="1")
+DEFAULT_PITCH = _parse_json_number("MINIMAX_TTS_PITCH", default="0")
 SYNC_CHAR_LIMIT = int(os.getenv("MINIMAX_SYNC_CHAR_LIMIT", "9500"))
 ASYNC_POLL_INTERVAL = float(os.getenv("MINIMAX_ASYNC_POLL_INTERVAL", "1.5"))
 ASYNC_TIMEOUT_SECONDS = float(os.getenv("MINIMAX_ASYNC_TIMEOUT_SECONDS", "180"))
@@ -40,15 +48,15 @@ AUDIO_MIME_TYPES = {
 SENTENCE_SPLIT_RE = re.compile(r"(?<=[.!?。！？\n])\s+")
 
 
-def _minimax_int_param(value: float | int | None, *, name: str) -> int:
+def _normalize_json_number(value: float | int | None, *, name: str) -> int | float:
     if value is None:
         raise ValueError(f"{name} cannot be None")
     if isinstance(value, bool):
         raise ValueError(f"{name} must be a number, not bool")
     numeric = float(value)
-    if not numeric.is_integer():
-        raise HTTPException(status_code=422, detail=f"MiniMax requires integer {name}; got {value}")
-    return int(numeric)
+    if numeric.is_integer():
+        return int(numeric)
+    return numeric
 
 
 class SpeechRequest(BaseModel):
@@ -98,9 +106,9 @@ class MiniMaxProxy:
             "language_boost": "auto",
             "voice_setting": {
                 "voice_id": voice,
-                "speed": _minimax_int_param(speed if speed is not None else DEFAULT_SPEED, name="speed"),
-                "vol": _minimax_int_param(DEFAULT_VOLUME, name="vol"),
-                "pitch": _minimax_int_param(DEFAULT_PITCH, name="pitch"),
+                "speed": _normalize_json_number(speed if speed is not None else DEFAULT_SPEED, name="speed"),
+                "vol": _normalize_json_number(DEFAULT_VOLUME, name="vol"),
+                "pitch": _normalize_json_number(DEFAULT_PITCH, name="pitch"),
             },
             "audio_setting": {
                 "sample_rate": DEFAULT_SAMPLE_RATE,
@@ -134,9 +142,9 @@ class MiniMaxProxy:
             "language_boost": "auto",
             "voice_setting": {
                 "voice_id": voice,
-                "speed": _minimax_int_param(DEFAULT_SPEED, name="speed"),
-                "vol": _minimax_int_param(DEFAULT_VOLUME, name="vol"),
-                "pitch": _minimax_int_param(DEFAULT_PITCH, name="pitch"),
+                "speed": _normalize_json_number(DEFAULT_SPEED, name="speed"),
+                "vol": _normalize_json_number(DEFAULT_VOLUME, name="vol"),
+                "pitch": _normalize_json_number(DEFAULT_PITCH, name="pitch"),
             },
             "audio_setting": {
                 "audio_sample_rate": DEFAULT_SAMPLE_RATE,

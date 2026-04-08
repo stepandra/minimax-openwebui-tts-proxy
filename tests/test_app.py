@@ -1,7 +1,7 @@
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from app.main import app, split_text_for_models, _minimax_int_param
+from app.main import app, split_text_for_models, _normalize_json_number
 
 
 @pytest.mark.asyncio
@@ -37,10 +37,9 @@ def test_split_text_for_models_long_text():
     assert all(len(part) <= 10 for part in parts)
 
 
-def test_minimax_int_param_accepts_integer_like_float():
-    assert _minimax_int_param(1.0, name="speed") == 1
+def test_normalize_json_number_converts_integer_like_float_to_int():
+    assert _normalize_json_number(1.0, name="speed") == 1
 
 
-def test_minimax_int_param_rejects_non_integer_float():
-    with pytest.raises(Exception):
-        _minimax_int_param(1.25, name="speed")
+def test_normalize_json_number_preserves_fractional_float():
+    assert _normalize_json_number(1.25, name="speed") == 1.25
