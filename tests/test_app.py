@@ -1,7 +1,7 @@
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from app.main import app, split_text_for_models
+from app.main import app, split_text_for_models, _minimax_int_param
 
 
 @pytest.mark.asyncio
@@ -35,3 +35,12 @@ def test_split_text_for_models_long_text():
     parts = split_text_for_models(text, limit=10)
     assert len(parts) >= 2
     assert all(len(part) <= 10 for part in parts)
+
+
+def test_minimax_int_param_accepts_integer_like_float():
+    assert _minimax_int_param(1.0, name="speed") == 1
+
+
+def test_minimax_int_param_rejects_non_integer_float():
+    with pytest.raises(Exception):
+        _minimax_int_param(1.25, name="speed")

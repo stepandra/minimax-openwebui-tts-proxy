@@ -40,6 +40,17 @@ AUDIO_MIME_TYPES = {
 SENTENCE_SPLIT_RE = re.compile(r"(?<=[.!?。！？\n])\s+")
 
 
+def _minimax_int_param(value: float | int | None, *, name: str) -> int:
+    if value is None:
+        raise ValueError(f"{name} cannot be None")
+    if isinstance(value, bool):
+        raise ValueError(f"{name} must be a number, not bool")
+    numeric = float(value)
+    if not numeric.is_integer():
+        raise HTTPException(status_code=422, detail=f"MiniMax requires integer {name}; got {value}")
+    return int(numeric)
+
+
 class SpeechRequest(BaseModel):
     model: str | None = None
     input: str = Field(min_length=1)
@@ -87,9 +98,9 @@ class MiniMaxProxy:
             "language_boost": "auto",
             "voice_setting": {
                 "voice_id": voice,
-                "speed": speed if speed is not None else DEFAULT_SPEED,
-                "vol": DEFAULT_VOLUME,
-                "pitch": DEFAULT_PITCH,
+                "speed": _minimax_int_param(speed if speed is not None else DEFAULT_SPEED, name="speed"),
+                "vol": _minimax_int_param(DEFAULT_VOLUME, name="vol"),
+                "pitch": _minimax_int_param(DEFAULT_PITCH, name="pitch"),
             },
             "audio_setting": {
                 "sample_rate": DEFAULT_SAMPLE_RATE,
@@ -123,9 +134,9 @@ class MiniMaxProxy:
             "language_boost": "auto",
             "voice_setting": {
                 "voice_id": voice,
-                "speed": DEFAULT_SPEED,
-                "vol": DEFAULT_VOLUME,
-                "pitch": DEFAULT_PITCH,
+                "speed": _minimax_int_param(DEFAULT_SPEED, name="speed"),
+                "vol": _minimax_int_param(DEFAULT_VOLUME, name="vol"),
+                "pitch": _minimax_int_param(DEFAULT_PITCH, name="pitch"),
             },
             "audio_setting": {
                 "audio_sample_rate": DEFAULT_SAMPLE_RATE,
