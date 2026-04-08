@@ -5,9 +5,10 @@ from app.main import app, split_text_for_models
 
 
 @pytest.mark.asyncio
-async def test_models_endpoint():
+@pytest.mark.parametrize("path", ["/v1/models", "/v1/audio/models"])
+async def test_models_endpoint(path: str):
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-        resp = await client.get("/v1/models")
+        resp = await client.get(path)
     assert resp.status_code == 200
     body = resp.json()
     assert body["object"] == "list"

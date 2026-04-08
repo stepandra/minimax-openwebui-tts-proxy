@@ -213,6 +213,8 @@ async def health() -> dict[str, str]:
 
 @app.get("/models")
 @app.get("/v1/models")
+@app.get("/audio/models")
+@app.get("/v1/audio/models")
 async def models() -> dict[str, Any]:
     return {
         "object": "list",
